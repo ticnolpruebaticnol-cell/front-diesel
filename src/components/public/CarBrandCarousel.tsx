@@ -35,7 +35,7 @@ const CarBrandCarousel: React.FC = () => {
           100% { transform: translateX(-50%); }
         }
         .animate-scroll-x {
-          animation: scroll-x 7s linear infinite;
+          animation: scroll-x 13s linear infinite;
         }
       `}</style>
     </div>
