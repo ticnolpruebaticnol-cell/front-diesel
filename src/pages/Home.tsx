@@ -122,11 +122,18 @@ const Home: React.FC = () => {
         {/* CARRUSEL DE MARCAS DE AUTOS */}
         <section className="bg-white py-10 rounded-[3rem] md:rounded-[5rem] my-10 shadow-inner">
           <div className="container mx-auto px-6">
-            <h2 className="text-2xl md:text-3xl font-bold uppercase font-title italic tracking-tighter text-center mb-8">Marcas de Autos</h2>
+            <div className="flex flex-col items-center mb-8">
+              <h2
+                className="text-3xl md:text-4xl font-extrabold mb-6 text-center drop-shadow-[0_2px_2px_rgba(0,0,0,0.15)]"
+              >
+                <span className="text-black">Nuestras</span>
+                <br />
+                <span className="text-black">Marcas Aliadas</span>
+              </h2>
+            </div>
             <CarBrandCarousel />
           </div>
         </section>
-
         {/* COMPONENTES ELITE */}
         <section className="bg-white py-24 rounded-[3rem] md:rounded-[5rem] my-10 shadow-inner">
           <div className="container mx-auto px-6">
@@ -167,12 +174,11 @@ const Home: React.FC = () => {
           </div>
         </section>
       </main>
-
       <Footer />
       <WhatsappFloat />
       <PqrsModal />
     </div>
   );
-};
+}
 
 export default Home;
