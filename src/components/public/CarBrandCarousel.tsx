@@ -14,9 +14,9 @@ const CarBrandCarousel: React.FC = () => {
 
   return (
     <div className="w-full overflow-x-auto py-6">
-      <div className="flex gap-8 items-center animate-scroll-x">
-        {brands.map((brand) => (
-          <div key={brand.id} className="flex flex-col items-center min-w-30">
+      <div className="flex gap-8 items-center animate-scroll-x" style={{ width: brands.length * 2 * 140 }}>
+        {[...brands, ...brands].map((brand, idx) => (
+          <div key={brand.id + '-' + idx} className="flex flex-col items-center min-w-30">
             <div className="bg-white rounded-2xl shadow-md p-4 flex items-center justify-center h-20 w-20 mb-2 border border-gray-100">
               <img
                 src={brand.logoUrl}
