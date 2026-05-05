@@ -1,9 +1,11 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+
 import Footer from '../components/public/Footer';
 import Navbar from '../components/public/Navbar';
 import PqrsModal from '../components/public/PqrsModal';
 import WhatsappFloat from '../components/public/WhatsappFloat';
+import CarBrandCarousel from '../components/public/CarBrandCarousel';
 
 // Componente de Icono con estilo "Ingeniería Suave"
 const FeatureIcon = ({ children }: { children: React.ReactNode }) => (
@@ -57,7 +59,7 @@ const Home: React.FC = () => {
         {/* HERO: Cinematic con bordes redondeados inferiores */}
         <section className="relative h-[58vh] flex items-center overflow-hidden bg-[#211F1E] rounded-b-[3rem] md:rounded-b-[5rem] shadow-2xl">
           <div className="absolute inset-0 z-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent z-10" />
+            <div className="absolute inset-0 bg-linear-to-r from-black/80 via-black/40 to-transparent z-10" />
             <img 
               src="https://images.unsplash.com/photo-1486006920555-c77dcf18193b?auto=format&fit=crop&q=80" 
               className="w-full h-full object-cover scale-105"
@@ -88,7 +90,7 @@ const Home: React.FC = () => {
 
         {/* STATS: Card Flotante Redondeada */}
         <section className="relative z-30 -mt-12 container mx-auto px-6">
-          <div className="bg-white rounded-[2rem] shadow-2xl p-8 md:p-12 grid grid-cols-2 md:grid-cols-4 gap-8 border border-gray-100">
+          <div className="bg-white rounded-4xl shadow-2xl p-8 md:p-12 grid grid-cols-2 md:grid-cols-4 gap-8 border border-gray-100">
             {[
               { val: '15+', lab: 'Años Trayectoria' },
               { val: '3k+', lab: 'Motores Listos' },
@@ -107,7 +109,7 @@ const Home: React.FC = () => {
         <section className="py-32 container mx-auto px-6">
           <div className="grid md:grid-cols-3 gap-10">
             {FEATURES.map((f, i) => (
-              <div key={i} className="reveal opacity-0 translate-y-10 transition-all duration-700 delay-100 group p-8 rounded-[2rem] hover:bg-white hover:shadow-2xl transition-all border border-transparent hover:border-gray-100">
+              <div key={i} className="reveal opacity-0 translate-y-10 duration-700 delay-100 group p-8 rounded-4xl hover:bg-white hover:shadow-2xl border border-transparent hover:border-gray-100">
                 <FeatureIcon>{f.icon}</FeatureIcon>
                 <h3 className="text-xl font-bold mb-4 uppercase tracking-tighter group-hover:text-[#1A9E53] transition-colors italic">{f.title}</h3>
                 <p className="text-gray-500 leading-relaxed font-medium">{f.desc}</p>
@@ -117,6 +119,15 @@ const Home: React.FC = () => {
         </section>
 
         {/* CATEGORÍAS: Grid con imágenes redondeadas y overlays suaves */}
+        {/* CARRUSEL DE MARCAS DE AUTOS */}
+        <section className="bg-white py-10 rounded-[3rem] md:rounded-[5rem] my-10 shadow-inner">
+          <div className="container mx-auto px-6">
+            <h2 className="text-2xl md:text-3xl font-bold uppercase font-title italic tracking-tighter text-center mb-8">Marcas de Autos</h2>
+            <CarBrandCarousel />
+          </div>
+        </section>
+
+        {/* COMPONENTES ELITE */}
         <section className="bg-white py-24 rounded-[3rem] md:rounded-[5rem] my-10 shadow-inner">
           <div className="container mx-auto px-6">
             <div className="flex flex-col md:flex-row justify-between items-center mb-16 gap-4">
@@ -126,7 +137,6 @@ const Home: React.FC = () => {
               </div>
               <Link to="/productos" className="text-xs font-bold uppercase tracking-[0.2em] px-6 py-3 border-2 border-[#211F1E] rounded-full hover:bg-[#211F1E] hover:text-white transition-all">Ver catálogo completo</Link>
             </div>
-            
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
               {['Bombas', 'Inyectores', 'Sensores', 'Filtros'].map((name, i) => (
                 <div key={i} className="relative h-80 overflow-hidden group bg-gray-50 rounded-[2.5rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500">
@@ -135,7 +145,7 @@ const Home: React.FC = () => {
                     alt={name} 
                     className="w-full h-full object-contain p-10 group-hover:scale-110 transition-transform duration-700" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#211F1E]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute inset-0 bg-linear-to-t from-[#211F1E]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute bottom-6 left-0 right-0 text-center">
                     <span className="text-xl font-bold uppercase italic text-[#211F1E] group-hover:text-white transition-colors">{name}</span>
                   </div>
