@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import AuthPopup from './AuthPopup';
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.png';
+import CartPopup from '../catalog/CartPopup';
+import { useCart } from '../../context/CartContext';
+// import UserPurchases from './UserPurchases';
 
 interface AuthUser {
   firstName?: string;
@@ -12,6 +16,11 @@ const Navbar: React.FC<{ activePage?: string }> = ({ activePage = '' }) => {
   const [scrolled, setScrolled] = useState(false);
   const [authUser, setAuthUser] = useState<AuthUser | null>(null);
   const [isOpen, setIsOpen] = useState(false); // Estado para el menú móvil
+  // const [showPurchases, setShowPurchases] = useState(false); // Estado para mostrar compras
+  const [showAuth, setShowAuth] = useState(false);
+  const [showCart, setShowCart] = useState(false);
+  const { cart } = useCart();
+  const cartItemsCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -49,11 +58,12 @@ const Navbar: React.FC<{ activePage?: string }> = ({ activePage = '' }) => {
     { to: '/', label: 'Inicio', key: 'home' },
     { to: '/servicios', label: 'Servicios', key: 'servicios' },
     { to: '/productos', label: 'Productos', key: 'productos' },
-    { to: '/contacto', label: 'Contacto', key: 'contacto' },
+    { to: '/contacto', label: 'Contacto', key: 'cocto' },
   ];
 
   return (
     <>
+
       <header 
         className={`navbar-bebas fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
           scrolled || isOpen ? 'bg-white/90 backdrop-blur-md py-3 shadow-xl' : 'bg-transparent py-6'
@@ -96,12 +106,37 @@ const Navbar: React.FC<{ activePage?: string }> = ({ activePage = '' }) => {
                 {label}
               </Link>
             ))}
+            <Link
+              to="/compras"
+              className={`text-lg font-bold uppercase tracking-widest transition-all duration-300 relative py-2 px-2 mx-1 ${scrolled ? 'text-[#211F1E]' : 'text-white'} hover:text-[#1A9E53] hover:scale-105`}
+            >
+              Mis Compras
+            </Link>
+            <button
+              className={`text-lg font-bold uppercase tracking-widest transition-all duration-300 relative py-2 px-2 mx-1 ${scrolled ? 'text-[#211F1E]' : 'text-white'} hover:text-[#1A9E53] hover:scale-105`}
+              onClick={() => setShowAuth(true)}
+            >
+              Login
+            </button>
+            <button
+              className={`text-lg font-bold uppercase tracking-widest transition-all duration-300 relative py-2 px-2 mx-1 ${scrolled ? 'text-[#211F1E]' : 'text-white'} hover:text-[#1A9E53] hover:scale-105 flex items-center gap-2`}
+              onClick={() => setShowCart(true)}
+              aria-label="Abrir carrito de compras"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2m0 0L7 13h10l2-8H5.4zM7 13l-1 5h12M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z" />
+              </svg>
+              <span>Carrito</span>
+              {cartItemsCount > 0 && (
+                <span className="min-w-[20px] h-5 px-1 rounded-full bg-[#1A9E53] text-white text-[10px] font-black flex items-center justify-center">
+                  {cartItemsCount}
+                </span>
+              )}
+            </button>
           </nav>
 
-          {/* ACCIONES DE USUARIO Y CTA */}
-          <div className="flex items-center gap-4 md:gap-6">
-
-          </div>
+          {/* ACCIONES DE USUARIO DESKTOP */}
+          <div className="hidden md:flex items-center gap-4 md:gap-6" />
         </div>
       </header>
 
@@ -126,6 +161,40 @@ const Navbar: React.FC<{ activePage?: string }> = ({ activePage = '' }) => {
                 {label}
               </Link>
             ))}
+            <Link
+              to="/compras"
+              className="text-lg font-bold uppercase tracking-widest text-[#211F1E] bg-green-600 px-3 py-1 rounded shadow hover:bg-green-700 hover:text-white"
+              onClick={() => setIsOpen(false)}
+            >
+              Mis Compras
+            </Link>
+            <button
+              className="text-lg font-bold uppercase tracking-widest text-[#211F1E] bg-white px-3 py-1 rounded shadow hover:text-[#1A9E53] text-left"
+              onClick={() => {
+                setIsOpen(false);
+                setShowAuth(true);
+              }}
+            >
+              Login
+            </button>
+            <button
+              className="text-lg font-bold uppercase tracking-widest text-[#211F1E] bg-white px-3 py-1 rounded shadow hover:text-[#1A9E53] flex items-center gap-2"
+              onClick={() => {
+                setIsOpen(false);
+                setShowCart(true);
+              }}
+              aria-label="Abrir carrito de compras"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2m0 0L7 13h10l2-8H5.4zM7 13l-1 5h12M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z" />
+              </svg>
+              <span>Carrito</span>
+              {cartItemsCount > 0 && (
+                <span className="min-w-[20px] h-5 px-1 rounded-full bg-[#1A9E53] text-white text-[10px] font-black flex items-center justify-center">
+                  {cartItemsCount}
+                </span>
+              )}
+            </button>
             <hr className="border-gray-100" />
             {/* <a 
               href="https://dieselsoluciones.com/" 
@@ -138,6 +207,8 @@ const Navbar: React.FC<{ activePage?: string }> = ({ activePage = '' }) => {
           </nav>
         </aside>
       </div>
+      {showAuth && <AuthPopup onClose={() => setShowAuth(false)} />}
+      <CartPopup open={showCart} onClose={() => setShowCart(false)} onCheckout={() => {}} />
     </>
   );
 };
