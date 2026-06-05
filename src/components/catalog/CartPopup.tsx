@@ -2,6 +2,11 @@ import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { createPaymentPreference, createPurchase } from '../../services/product';
+// 1. Importamos el componente e inicializador de Mercado Pago
+import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
+
+// 2. Inicializa el SDK con tu Public Key (Cámbiala por tu clave real o usa variables de entorno)
+initMercadoPago('APP_USR-7ff788b2-0abe-4cf4-a5aa-c18bcb8eaadd');
 
 interface CartPopupProps {
   open: boolean;
@@ -16,6 +21,10 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Nuevo estado para guardar el ID de la preferencia de Mercado Pago
+  const [preferenceId, setPreferenceId] = useState<string | null>(null);
+
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const formatPrice = (value: number) => Math.round(Number(value || 0)).toLocaleString('es-CO');
 
@@ -31,7 +40,7 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
     }
   };
 
-  const handleCheckout = async () => {
+const handleCheckout = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -45,26 +54,27 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
         })),
       });
 
-      if (!purchase?.id) {
+      if (!purchase?.id && !purchase?.purchaseId) {
         throw new Error('No se recibió el ID de la compra');
       }
 
-      const preference = await createPaymentPreference(purchase.id);
-      const paymentUrl = preference.checkoutUrl;
-
-      if (!paymentUrl) {
-        throw new Error('No se recibió checkoutUrl de Mercado Pago');
+      // Tomamos el ID de la compra (ya sea id o purchaseId)
+      const pId = purchase.id || purchase.purchaseId;
+      const preference = await createPaymentPreference(pId);
+      
+      // CORRECCIÓN AQUÍ: Tu JSON del backend trae 'preferenceId', no 'id'
+      if (!preference?.preferenceId) {
+        console.error("Respuesta del backend recibida:", preference); // Para debuggear por si acaso
+        throw new Error('No se recibió el preferenceId de Mercado Pago');
       }
 
-      window.location.href = paymentUrl;
-
+      // Guardamos el ID correcto que viene del backend
+      setPreferenceId(preference.preferenceId);
       setSuccess(true);
       clearCart();
-      setTimeout(() => {
-        setSuccess(false);
-        onClose();
-      }, 1500);
-    } catch {
+    } catch (err) {
+      // Te sugiero imprimir el error real en la consola para que no programes a ciegas
+      console.error("Error en el checkout:", err); 
       setError('Error al procesar la orden en el laboratorio.');
     } finally {
       setLoading(false);
@@ -75,10 +85,9 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
     <div className="fixed inset-0 bg-[#211F1E]/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-all duration-300">
       <div className="bg-white rounded-3xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] border border-gray-100 w-full max-w-md relative overflow-hidden flex flex-col max-h-[85vh]">
         
-        {/* Decoración superior estética Innova Diesel */}
         <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#1A9E53] to-[#2ecc71]" />
 
-        {/* Header del Modal */}
+        {/* Header */}
         <div className="p-6 pb-4 border-b border-gray-100 flex justify-between items-center mt-1">
           <div>
             <span className="text-[10px] font-black text-[#1A9E53] uppercase tracking-[0.3em] block mb-0.5">
@@ -89,7 +98,7 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
             </h2>
           </div>
           <button 
-            className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-[#211F1E] hover:text-white transition-all duration-300 font-sans text-xs"
+            className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-[#211F1E] hover:text-white transition-all duration-300 text-xs"
             onClick={onClose}
           >
             ✕
@@ -98,7 +107,7 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
 
         {/* Cuerpo / Lista de Productos */}
         <div className="p-6 overflow-y-auto flex-grow space-y-4 custom-scrollbar">
-          {cart.length === 0 ? (
+          {cart.length === 0 && !preferenceId ? (
             <div className="text-center py-12 flex flex-col items-center justify-center">
               <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300 mb-4 border border-dashed border-gray-200">
                 📦
@@ -106,16 +115,13 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
               <p className="text-sm font-medium text-gray-400 uppercase tracking-wider">
                 El carrito está vacío
               </p>
-              <p className="text-xs text-gray-400 font-mono mt-1">
-                Añade componentes para iniciar el ensamblaje.
-              </p>
             </div>
           ) : (
             <div className="divide-y divide-gray-50">
               {cart.map(item => (
                 <div key={item.productId} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0 group">
                   <div className="flex-grow pr-4">
-                    <h4 className="text-sm font-extrabold text-[#211F1E] uppercase tracking-tight line-clamp-1 group-hover:text-[#1A9E53] transition-colors duration-300">
+                    <h4 className="text-sm font-extrabold text-[#211F1E] uppercase tracking-tight line-clamp-1">
                       {item.name}
                     </h4>
                     <span className="text-xs font-mono text-gray-400 font-bold block mt-0.5">
@@ -124,11 +130,11 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
                   </div>
 
                   <div className="flex items-center gap-4 shrink-0">
-                    {/* Controles de Cantidad */}
                     <div className="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
                       <button 
                         onClick={() => updateQuantity(item.productId, item.quantity - 1)} 
-                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-gray-600 font-bold hover:bg-[#211F1E] hover:text-white transition-colors text-xs shadow-sm"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-gray-600 font-bold hover:bg-[#211F1E] hover:text-white text-xs"
+                        disabled={!!preferenceId}
                       >
                         -
                       </button>
@@ -137,26 +143,17 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
                       </span>
                       <button 
                         onClick={() => updateQuantity(item.productId, item.quantity + 1)} 
-                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-gray-600 font-bold hover:bg-[#211F1E] hover:text-white transition-colors text-xs shadow-sm"
+                        className="w-7 h-7 flex items-center justify-center rounded-lg bg-white text-gray-600 font-bold hover:bg-[#211F1E] hover:text-white text-xs"
+                        disabled={!!preferenceId}
                       >
                         +
                       </button>
                     </div>
 
-                    {/* Precio Total por Item e icono de borrar */}
                     <div className="flex items-center gap-2 min-w-[75px] justify-end">
                       <span className="text-sm font-mono font-black text-[#211F1E]">
                         ${formatPrice(item.price * item.quantity)}
                       </span>
-                      <button 
-                        onClick={() => removeFromCart(item.productId)} 
-                        className="text-gray-300 hover:text-red-500 transition-colors p-1"
-                        title="Eliminar componente"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -165,15 +162,12 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
           )}
         </div>
 
-        {/* Footer del Modal: Totales y Botón de Checkout */}
+        {/* Footer */}
         <div className="p-6 bg-gray-50 border-t border-gray-100 space-y-4">
           <div className="flex justify-between items-end">
             <div>
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest font-mono block">
                 TOTAL ESTIMADO
-              </span>
-              <span className="text-xs text-gray-400 font-light block">
-                Impuestos y soporte incluidos
               </span>
             </div>
             <span className="text-3xl font-mono font-black text-[#1A9E53]">
@@ -181,37 +175,35 @@ const CartPopup: React.FC<CartPopupProps> = ({ open, onClose }) => {
             </span>
           </div>
 
-          {/* Alertas de Feedback */}
           {error && (
             <div className="bg-red-50 text-red-600 px-4 py-2.5 rounded-xl text-xs font-mono font-bold border border-red-100">
               ⚠️ {error}
             </div>
           )}
           
-          {success && (
-            <div className="bg-green-50 text-green-600 px-4 py-2.5 rounded-xl text-xs font-mono font-bold border border-green-100 flex items-center gap-2 animate-pulse">
+          {success && !preferenceId && (
+            <div className="bg-green-50 text-green-600 px-4 py-2.5 rounded-xl text-xs font-mono font-bold border border-green-100">
               ✅ ¡ORDEN PROCESADA CON ÉXITO!
             </div>
           )}
 
-          {/* Botón de Checkout */}
-          <button
-            className="w-full bg-[#211F1E] hover:bg-[#1A9E53] text-white disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed font-black uppercase text-xs italic tracking-widest py-4 px-6 rounded-2xl transition-all duration-500 transform active:scale-[0.98] shadow-md hover:shadow-[0_10px_20px_rgba(26,158,83,0.2)] flex items-center justify-center gap-2"
-            onClick={handleCheckout}
-            disabled={cart.length === 0 || loading || success}
-          >
-            {loading ? (
-              <>
-                <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                <span>Sincronizando...</span>
-              </>
-            ) : (
-              <span>PROCESAR COMPRA</span>
-            )}
-          </button>
+          {/* BOTÓN DINÁMICO: Si ya tenemos el preferenceId, renderiza el Wallet Brick oficial */}
+          {preferenceId ? (
+            <div className="mt-2 min-h-[48px]">
+              <Wallet 
+                initialization={{ preferenceId: preferenceId }} 
+                customization={{ texts: { valueProp: 'smart_option' } }}
+              />
+            </div>
+          ) : (
+            <button
+              className="w-full bg-[#211F1E] hover:bg-[#1A9E53] text-white disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed font-black uppercase text-xs italic tracking-widest py-4 px-6 rounded-2xl transition-all duration-500"
+              onClick={handleCheckout}
+              disabled={cart.length === 0 || loading}
+            >
+              {loading ? 'Sincronizando...' : 'PROCESAR COMPRA'}
+            </button>
+          )}
         </div>
 
       </div>

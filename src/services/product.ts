@@ -89,6 +89,14 @@ export interface VerifyPurchasePaymentResponse {
   mpPaymentStatus?: string;
 }
 
+export interface PaymentStatusResponse {
+  paymentId: number | string;
+  status: string;
+  statusDetail?: string;
+  purchaseId?: number;
+  purchaseStatus?: 'PAID' | 'PENDING' | 'REJECTED' | string;
+}
+
 
 // --- Productos ---
 export interface Product {
@@ -158,4 +166,8 @@ export async function createPaymentPreference(purchaseId: number): Promise<Payme
 
 export async function verifyPurchasePayment(purchaseId: number): Promise<VerifyPurchasePaymentResponse> {
   return apiFetch<VerifyPurchasePaymentResponse>(`/payment/verify/purchase/${purchaseId}`);
+}
+
+export async function getPaymentStatus(paymentId: number | string): Promise<PaymentStatusResponse> {
+  return apiFetch<PaymentStatusResponse>(`/payment/status/${paymentId}`);
 }
