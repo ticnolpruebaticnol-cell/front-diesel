@@ -42,7 +42,7 @@ const PagoResultado: React.FC = () => {
   };
 
   const effectiveStatus = useMemo(() => {
-    const source = (backendStatus || rawStatus || '').toUpperCase();
+    const source = (backendStatus || (verifying ? '' : rawStatus) || '').toUpperCase();
     if (source === 'PAID' || source === 'APPROVED') return 'PAID';
     if (source === 'PENDING' || source === 'IN_PROCESS') return 'PENDING';
     if (source === 'REJECTED' || source === 'FAILURE') return 'REJECTED';
