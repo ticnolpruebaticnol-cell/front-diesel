@@ -120,7 +120,7 @@ const PagoResultado: React.FC = () => {
   // Limpiar el carrito automáticamente al llegar a esta vista
   useEffect(() => {
     clearCart();
-  }, [clearCart]);
+  }, []);
 
   useEffect(() => {
     verifyAndRefresh();
