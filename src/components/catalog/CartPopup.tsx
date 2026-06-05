@@ -71,7 +71,6 @@ const handleCheckout = async () => {
       // Guardamos el ID correcto que viene del backend
       setPreferenceId(preference.preferenceId);
       setSuccess(true);
-      clearCart();
     } catch (err) {
       // Te sugiero imprimir el error real en la consola para que no programes a ciegas
       console.error("Error en el checkout:", err); 
