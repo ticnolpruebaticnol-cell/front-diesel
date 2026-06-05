@@ -6,7 +6,7 @@ import { createPaymentPreference, createPurchase } from '../../services/product'
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react';
 
 // 2. Inicializa el SDK con tu Public Key (Cámbiala por tu clave real o usa variables de entorno)
-initMercadoPago('APP_USR-7ff788b2-0abe-4cf4-a5aa-c18bcb8eaadd');
+initMercadoPago('APP_USR-a1ff286a-e88c-4f70-ac17-7aae0c11e961');
 
 interface CartPopupProps {
   open: boolean;
