@@ -6,6 +6,7 @@ import WhatsappFloat from '../components/public/WhatsappFloat';
 import PqrsModal from '../components/public/PqrsModal';
 import { getUserPurchases, verifyPurchasePayment } from '../services/product';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 
 const MAX_RETRIES = 5;
 const RETRY_DELAY_MS = 2500;
@@ -13,6 +14,7 @@ const RETRY_DELAY_MS = 2500;
 const PagoResultado: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { token } = useAuth();
+  const { clearCart } = useCart();
   const [attempt, setAttempt] = useState(0);
   const [verifying, setVerifying] = useState(false);
   const [verifyError, setVerifyError] = useState<string | null>(null);
@@ -114,6 +116,11 @@ const PagoResultado: React.FC = () => {
 
     setVerifying(false);
   };
+
+  // Limpiar el carrito automáticamente al llegar a esta vista
+  useEffect(() => {
+    clearCart();
+  }, [clearCart]);
 
   useEffect(() => {
     verifyAndRefresh();
